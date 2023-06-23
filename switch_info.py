@@ -9,6 +9,7 @@ dashboard = meraki.DashboardAPI(key.api_key, suppress_logging = True)
 def get_switch_ports(serial):
     try:
         response = dashboard.switch.getDeviceSwitchPorts(serial)
+        print(f'Switch_Ports: {response}')
     except:
         return ConnectionRefusedError
     
@@ -19,8 +20,9 @@ def get_static_routes(serial):
 
     try:
         response = dashboard.switch.getDeviceSwitchRoutingStaticRoutes(serial)
+        print(f'Static_Routes: {response}')
     except:
-        return ConnectionRefusedError
+        return [{f'{ConnectionRefusedError}': 'No Static routes Configured'}]
     
     return response
 
@@ -29,8 +31,9 @@ def get_l3_interfaces(serial):
 
     try:
         response = dashboard.switch.getDeviceSwitchRoutingInterfaces(serial)
+        print(f'L3_Interfaces: {response}')
     except:
-        return ConnectionRefusedError
+        return [{f'{ConnectionRefusedError}': 'No L3 Interfaces Configured'}]
     
     return response
 
@@ -52,7 +55,7 @@ def write_txt(filename, data):
 
 # GET switch info and call functions to write data to files.
 def get_switch_info(serial):
-    
+
     # Parse GET response and pass as an argument to write_csv function
     try:
         static_routes = get_static_routes(serial)
@@ -63,6 +66,7 @@ def get_switch_info(serial):
             write_csv(f'StaticRoutes_{serial}_{date.today()}', static_routes)
     except Exception:
         print(f'Error: {str(Exception)}')
+        static_routes = [{'Value': 'No static routes configured'}]
     
     try:
         l3_interfaces = get_l3_interfaces(serial)
@@ -72,12 +76,12 @@ def get_switch_info(serial):
             write_csv(f'L3Interfaces_{serial}_{date.today()}', l3_interfaces)
     except Exception:
         print(f'Error: {str(Exception)}')
+        l3_interfaces = [{'Value': 'No L3 Interfaces Configured'}]
 
     try:
         switch_ports = get_switch_ports(serial)
-
         if type(switch_ports) != list:
-            print('Error')
+            print(f'Invalid response: {switch_ports}')
         else:
             write_csv(f'SwitchPorts_{serial}_{date.today()}', switch_ports)
     except Exception:
@@ -89,6 +93,7 @@ def get_switch_info(serial):
         'l3_interfaces': l3_interfaces,
         'switch_ports': switch_ports
     }
+    print(all_info)
     # filename structured as 'AllInfo_{Serial}_{CurrentDate}' e.g. AllInfo_Q2QN9J8LSLPD_20230622.txt
     write_txt(f'AllInfo_{serial}_{date.today()}', all_info)
 
@@ -97,7 +102,9 @@ def main():
     serial = input('Please enter the serial No. of the target switch without any "-".\nE.g. Q2QN9J8LSLPD or q2qn9j8lslpd\n> ')
 
     if len(serial) > 0 and len(serial) < 13:
-        get_switch_info(serial)
+        parsed_serial = (serial[:4] + '-' + serial[4:8] + '-' + serial[8:12])
+        get_switch_info(parsed_serial)
+
     else:
         print('Invalid serial No.')
         main()
