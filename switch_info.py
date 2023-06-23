@@ -9,7 +9,7 @@ dashboard = meraki.DashboardAPI(key.api_key, suppress_logging = True)
 def get_switch_ports(serial):
     try:
         response = dashboard.switch.getDeviceSwitchPorts(serial)
-        print(f'Switch_Ports: {response}')
+        #print(f'Switch_Ports: {response}')
     except:
         return ConnectionRefusedError
     
@@ -20,7 +20,7 @@ def get_static_routes(serial):
 
     try:
         response = dashboard.switch.getDeviceSwitchRoutingStaticRoutes(serial)
-        print(f'Static_Routes: {response}')
+        #print(f'Static_Routes: {response}')
     except:
         return [{f'{ConnectionRefusedError}': 'No Static routes Configured'}]
     
@@ -31,7 +31,7 @@ def get_l3_interfaces(serial):
 
     try:
         response = dashboard.switch.getDeviceSwitchRoutingInterfaces(serial)
-        print(f'L3_Interfaces: {response}')
+        #print(f'L3_Interfaces: {response}')
     except:
         return [{f'{ConnectionRefusedError}': 'No L3 Interfaces Configured'}]
     
@@ -93,7 +93,7 @@ def get_switch_info(serial):
         'l3_interfaces': l3_interfaces,
         'switch_ports': switch_ports
     }
-    print(all_info)
+
     # filename structured as 'AllInfo_{Serial}_{CurrentDate}' e.g. AllInfo_Q2QN9J8LSLPD_20230622.txt
     write_txt(f'AllInfo_{serial}_{date.today()}', all_info)
 
